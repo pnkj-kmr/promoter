@@ -1,0 +1,45 @@
+
+config:
+  bind: 127.0.0.1:8081
+  cluster_id: XXX
+  my_id: 2
+  priority: 102
+  role:
+    - leader 
+    - broker
+  leader_nodes:
+    - 127.0.0.1:8080
+    - 127.0.0.1:8081
+
+
+applications:
+  app1:
+    app_id: 1
+    priority: 100
+    persist: 2
+    status_match: "redis             started"
+    status: |
+      echo "status checking...."
+      brew services list 
+    stop: |
+      echo "stopping..."
+      brew services stop redis 
+    start: |
+      echo "starting..."   
+      brew services run redis 
+
+  app2:
+    app_id: 2
+    priority: 100
+    persist: 1
+    status_match: "rabbitmq          started"
+    status: |
+      echo "status checking...."
+      brew services list 
+    stop: |
+      echo "stopping..."
+      brew services stop rabbitmq 
+    start: |
+      echo "starting..."   
+      brew services run rabbitmq 
+      

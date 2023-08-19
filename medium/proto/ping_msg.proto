@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package = "./medium/pb";
+
+message ReqPing { 
+    string ref_id = 1; 
+}
+
+message ResPing { 
+    string ref_id = 1; 
+    int32 my_id = 2; 
+    int32 priority = 3; 
+    bool leader_node = 4;
+}

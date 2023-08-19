@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option go_package = "./medium/pb";
+
+message ReqAppStatus { 
+    string ref_id = 1; 
+}
+
+message AppStatus {
+    string name = 1;
+    int32 app_id = 2; 
+    int32 priority = 3;
+    int32 persist = 4;
+    bool status = 5;
+}
+
+message ResAppStatus { 
+    string ref_id = 1; 
+    int32 my_id = 2; 
+    int32 priority = 3; 
+    repeated AppStatus apps = 4;
+}

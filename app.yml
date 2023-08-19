@@ -1,0 +1,94 @@
+# app.yml
+# promoter configuration file
+
+config:
+  # unique id of promoter
+  # my_id very important to work properly,
+  # make sure every promoter has unique id
+  my_id: 1
+
+  # cluster helps to communicate with other promoter(s)
+  # it's kind of a secret key for communication
+  cluster_id: XXX
+
+  # priority of promoter node
+  # helps to choose leader node
+  # if more than one leader_nodes added
+  # higher priority node will be leader
+  # range 0 - 100
+  priority: 100
+
+  # promoter app refresh interval
+  # default refresh_rate - 30 seconds
+  # refresh_rate: 30
+
+  # timeout for any computation
+  # default - 90 seconds
+  # timeout: 90
+
+  # promoter roles
+  # there are two possible roles
+  #   - leader : decisions maker node
+  #   - broker : a worker node
+  role:
+    - leader
+    - broker
+
+  # promoter starting address
+  bind: 127.0.0.1:8080
+
+  # all leader nodes bind address
+  # it's very important
+  # 1) leader node selection
+  # 2) broker node hearbeat management
+  leader_nodes:
+    - 127.0.0.1:8080
+    - 127.0.0.1:8081
+
+applications:
+  # name of application
+  # add multiple if needed
+
+  app1:
+    # application unique id
+    app_id: 1
+    # application priority helps to make
+    # high chances to run first
+    # over multiple node applications
+    # range 0 - 1000
+    priority: 101
+    # application persistance stands that
+    # no of application(s)
+    # keep active(running) at a time
+    # value > 0
+    persist: 1
+    # application status matching text
+    # to decide application up/down
+    status_match: "redis             started"
+    # applcation status command
+    status: |
+      echo "status checking...."
+      brew services list
+    # applcation stop command
+    stop: |
+      echo "stopping..."
+      brew services stop redis
+    # applcation start command
+    start: |
+      echo "starting..."   
+      brew services run redis
+
+  app2:
+    app_id: 2
+    priority: 101
+    persist: 1
+    status_match: "rabbitmq          started"
+    status: |
+      echo "status checking...."
+      brew services list
+    stop: |
+      echo "stopping..."
+      brew services stop rabbitmq
+    start: |
+      echo "starting..."   
+      brew services run rabbitmq

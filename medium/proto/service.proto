@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "./medium/pb";
+
+import "ping_msg.proto";
+import "check_msg.proto";
+import "beat_msg.proto";
+import "app_msg.proto";
+import "service_msg.proto";
+
+service Promote {
+  rpc Ping(ReqPing) returns(ResPing){};
+  rpc AreYouLeader(ReqLead) returns(ResLead){};
+  rpc Heartbeat(ReqBeat) returns(ResBeat){};
+  rpc AppsStatus(ReqAppStatus) returns(ResAppStatus){};
+  rpc AppAction(ReqAppService) returns(ResAppService){};
+}

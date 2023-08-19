@@ -1,0 +1,7 @@
+dist/
+tmp/
+log/
+db-1/
+db-2/
+**.tar.gz
+TODO

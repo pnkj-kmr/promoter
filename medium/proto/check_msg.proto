@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+option go_package = "./medium/pb";
+
+message ReqLead { 
+    string ref_id = 1;
+}
+
+message ResLead { 
+    string ref_id = 1;  
+    bool ok = 2; 
+}
