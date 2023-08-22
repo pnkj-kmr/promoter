@@ -11,17 +11,13 @@ import (
 func (p *_ps) getAppsStatus() (out []models.AppService) {
 	for name := range settings.APPS {
 		_app := service.New(name)
-		err := _app.Check()
-		_ok := true
-		if err != nil {
-			_ok = false
-		}
+		_app.Check()
 		out = append(out, models.AppService{
 			Name:     name,
 			AppId:    _app.GetID(),
 			Priority: _app.GetPriority(),
 			Persist:  _app.GetPersist(),
-			Ok:       _ok,
+			Ok:       _app.Ok(),
 		})
 	}
 	return

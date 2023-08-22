@@ -63,6 +63,10 @@ func (s *_service) Stop() error {
 	return s._execute(s.app.Stop, os.Stdout)
 }
 
+func (s *_service) Ok() bool {
+	return s._check
+}
+
 func (s *_service) Check() (err error) {
 	s.l.Debug("application status...", zap.Any("app_id", s.app.AppId))
 	if s.app.Status == "" {

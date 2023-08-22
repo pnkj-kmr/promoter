@@ -9,6 +9,7 @@ type Stopper interface {
 }
 
 type Checker interface {
+	Ok() bool
 	Check() error
 }
 
