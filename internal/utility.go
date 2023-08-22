@@ -169,7 +169,10 @@ func getGroupedStatusOfApps() (appsMap map[string]map[string][]models.AppService
 		if _ok {
 			appsMap[app.Name][_status] = append(_data, app)
 		} else {
-			appsMap[app.Name] = make(map[string][]models.AppService)
+			_, ok_ := appsMap[app.Name]
+			if !ok_ {
+				appsMap[app.Name] = make(map[string][]models.AppService)
+			}
 			appsMap[app.Name][_status] = []models.AppService{app}
 		}
 	}
