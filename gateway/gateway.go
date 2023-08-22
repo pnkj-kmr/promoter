@@ -28,53 +28,58 @@ func NewBroker() Broker { return _new() }
 // AmILeader
 func (c *_psclient) AmILeader() (ok bool) {
 	c.l.Debug("enter - checking ami leader node")
-	var _decide decision.Decision
-	_result := make(chan decision.Metrics, len(c.nodes))
-	for _, addr := range c.nodes {
-		c.l.Debug("pinging node", zap.Any("node", addr))
-		go c._ping(addr, _result)
-	}
-	i := 1
-	for _metrics := range _result {
-		c.l.Debug("leader metrics --- received", zap.Any("metrics", _metrics))
-		if _metrics.Attr != "" {
-			_decide = append(_decide, _metrics)
+	totalNodes := len(c.nodes)
+	if totalNodes > 0 {
+		var _decide decision.Decision
+		_result := make(chan decision.Metrics, totalNodes)
+		for _, addr := range c.nodes {
+			c.l.Debug("pinging node", zap.Any("node", addr))
+			go c._ping(addr, _result)
 		}
-		if i == len(c.nodes) {
-			close(_result)
+		i := 1
+		for _metrics := range _result {
+			c.l.Debug("leader metrics --- received", zap.Any("metrics", _metrics))
+			if _metrics.Attr != "" {
+				_decide = append(_decide, _metrics)
+			}
+			if i == totalNodes {
+				close(_result)
+			}
+			i++
 		}
-		i++
-	}
-	t := len(c.nodes)
-	c.l.Debug("leader total leader nodes", zap.Any("nodes", t))
-	if !(t == 1) {
-		if len(_decide) < (t/2 + 1) {
-			c.l.Warn("leader election failed due to (half+1) are not up", zap.Any("up", len(_decide)))
-			return
+		c.l.Debug("leader total leader nodes", zap.Any("nodes", totalNodes))
+		if !(totalNodes == 1) {
+			if len(_decide) < (totalNodes/2 + 1) {
+				c.l.Warn("leader election failed due to (half+1) are not up", zap.Any("up", len(_decide)))
+				return
+			}
 		}
+		ok = _decide.For(c.conf.Bind)
 	}
-	ok = _decide.For(c.conf.Bind)
 	c.l.Debug("exit - checking ami leader node", zap.Bool("ok", ok))
 	return
 }
 
 func (c *_psclient) FindLeader() (ok bool, bind string) {
+	totalNodes := len(c.nodes)
 	c.l.Debug("enter - finding leader")
-	_result := make(chan _leaderData)
-	for _, addr := range c.nodes {
-		c.l.Debug("find for node", zap.Any("node", addr))
-		go c._findLeader(addr, _result)
-	}
-	i := 0
-	for _data := range _result {
-		c.l.Debug("data received for leader find", zap.Any("data", _data))
-		i += 1
-		if i == len(c.nodes) {
-			close(_result)
+	if totalNodes > 0 {
+		_result := make(chan _leaderData)
+		for _, addr := range c.nodes {
+			c.l.Debug("find for node", zap.Any("node", addr))
+			go c._findLeader(addr, _result)
 		}
-		if _data.ok {
-			ok = _data.ok
-			bind = _data.bind
+		i := 0
+		for _data := range _result {
+			c.l.Debug("data received for leader find", zap.Any("data", _data))
+			i += 1
+			if i == totalNodes {
+				close(_result)
+			}
+			if _data.ok {
+				ok = _data.ok
+				bind = _data.bind
+			}
 		}
 	}
 	c.l.Debug("exit - found leader", zap.Any("bind", bind))
@@ -107,24 +112,27 @@ func (c *_psclient) HeartbeatUpdate(addr string) (ok bool) {
 }
 
 func (c *_psclient) GetApps(nodes []models.Node) (apps []models.AppService) {
-	c.l.Debug("enter - getting apps status", zap.Any("nodes", len(nodes)))
-	_result := make(chan []models.AppService)
-	for _, node := range nodes {
-		c.l.Debug("getting apps status for node", zap.Any("node", node))
-		go c._getNodeApps(node, _result)
-	}
-	i := 0
-	for _data := range _result {
-		c.l.Debug("apps received", zap.Any("apps", _data))
-		i += 1
-		if i == len(nodes) {
-			close(_result)
+	totalNodes := len(nodes)
+	c.l.Debug("enter - getting apps status", zap.Any("nodes", totalNodes))
+	if totalNodes > 0 {
+		_result := make(chan []models.AppService)
+		for _, node := range nodes {
+			c.l.Debug("getting apps status for node", zap.Any("node", node))
+			go c._getNodeApps(node, _result)
 		}
-		if len(_data) > 0 {
-			apps = append(apps, _data...)
+		i := 0
+		for _data := range _result {
+			c.l.Debug("apps received", zap.Any("apps", _data))
+			i += 1
+			if i == totalNodes {
+				close(_result)
+			}
+			if len(_data) > 0 {
+				apps = append(apps, _data...)
+			}
 		}
 	}
-	c.l.Debug("exit - getting apps status", zap.Any("nodes", len(nodes)), zap.Any("apps", len(apps)))
+	c.l.Debug("exit - getting apps status", zap.Any("nodes", totalNodes), zap.Any("apps", len(apps)))
 	return
 }
 

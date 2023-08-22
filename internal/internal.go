@@ -37,13 +37,13 @@ func InitiateBroker() {
 		if _interval == 0 {
 			_interval = settings.DefaultSleep
 		}
-		_b := _broker{l: settings.L, interval: _interval}
 		go func() {
+			_b := _broker{l: settings.L, interval: _interval}
 			for {
 				time.Sleep(_b.interval)
 				err := _b.pushHeartbeatToLeader()
 				if err != nil {
-					settings.L.Warn("ERROR", zap.Error(err))
+					_b.l.Warn("ERROR", zap.Error(err))
 				}
 			}
 		}()
@@ -57,29 +57,32 @@ func InitiateLeader() {
 		if _interval == 0 {
 			_interval = settings.DefaultSleep
 		}
-		_l := _leader{l: settings.L, interval: _interval, _decideAfter: 0}
+
 		go func() {
+			_l := _leader{l: settings.L, interval: _interval, _decideAfter: 0}
 			for {
 				_l.check()
 				time.Sleep(_l.interval)
 			}
 		}()
+
 		go func() {
+			_l := _leader{l: settings.L, interval: _interval, _decideAfter: 0}
 			for {
 				time.Sleep(_l.interval)
+				_l.l.Info("=========== getting apps status ===========")
 				if settings.AL.Get() {
-					settings.L.Info("=========== apps status update ===========")
 					err := _l.appsUpdate()
 					if err != nil {
 						settings.L.Warn("ERROR", zap.Error(err))
 						continue
 					}
 					if _l.getCounter() == xChecks {
-						settings.L.Info("=========== decision triggered ===========")
+						_l.l.Info("=========== decision triggered ===========")
 						_l.setCounter(0)
 						err := _l.decide()
 						if err != nil {
-							settings.L.Warn("ERROR", zap.Error(err))
+							_l.l.Warn("ERROR", zap.Error(err))
 						}
 					} else {
 						_l.setCounter(_l.getCounter() + 1)
