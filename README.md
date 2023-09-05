@@ -12,7 +12,7 @@ Let's have an example - _"application APP_1 is deployed in Delhi and it's backup
 
 Here we have 2-scenarios where promoter can help us.
 
-![snapshot](./resource/p1.svg)
+![snapshot](./resource/p1.png)
 
 promoter comes with multitenancy along with
 
@@ -137,6 +137,4 @@ WantedBy=multi-user.target
 
 ### PROMOTER [Deployment Layouts]
 
-![snapshot](./resource/p2.svg)
-
-:)
+![snapshot](./resource/p2.png)
